@@ -318,4 +318,7 @@ def get_logs():
     return jsonify({"events": events})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Bind to the PORT environment variable for container platforms (defaults to 8080)
+    port = int(os.environ.get("PORT", 8080))
+    # Listen on all interfaces so Cloud Run can reach the container
+    app.run(host="0.0.0.0", port=port, debug=False)
