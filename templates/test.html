@@ -43,8 +43,8 @@
             border-radius: 100px;
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
-            /* smooth morph when we toggle immersive/compact state */
-            transition: width .45s cubic-bezier(.21,.74,.27,.99), padding .35s ease, gap .35s ease, background .35s ease, transform .45s cubic-bezier(.21,.74,.27,.99);
+            /* smoother morph when we toggle immersive/compact state */
+            transition: width .85s cubic-bezier(.22,.61,.36,1), padding .65s ease, gap .65s ease, background .65s ease, transform .85s cubic-bezier(.22,.61,.36,1);
         }
         .nav-left { display: flex; align-items: center; gap: 18px; }
         .brand { display: flex; align-items: center; gap: 12px; }
@@ -103,11 +103,11 @@
 
         /* Immersive compact nav state (activated on scroll into demo) */
         @media (min-width: 800px){
-            .nav.compact { width: clamp(360px, 60vw, 720px); justify-content: center; gap: 14px; padding: 16px 24px; background: rgba(0,0,0,0.85); }
-            .nav.compact .nav-left { gap: 12px; }
-            .nav.compact .brand img.logo { height: 30px; filter: drop-shadow(0 1px 8px rgba(255,255,255,0.22)); transition: height .35s ease; }
-            .nav.compact .links a { margin-left: 14px; }
-            .nav.compact .btn-try { padding: 8px 12px; transform: scale(0.96); transition: transform .35s ease, padding .35s ease; }
+            .nav.compact { width: clamp(480px, 68vw, 860px); justify-content: center; gap: 24px; padding: 18px 28px; background: rgba(0,0,0,0.85); }
+            .nav.compact .nav-left { gap: 18px; }
+            .nav.compact .brand img.logo { height: 32px; filter: drop-shadow(0 1px 8px rgba(255,255,255,0.22)); transition: height .6s ease; }
+            .nav.compact .links a { margin-left: 18px; }
+            .nav.compact .btn-try { padding: 10px 14px; transform: scale(0.985); transition: transform .6s ease, padding .6s ease; }
         }
         @media (prefers-reduced-motion: reduce){
             .nav{ transition: none; }
