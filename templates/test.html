@@ -651,6 +651,9 @@
             // GSAP animations
             initGSAPAnimations();
 
+            // Compact nav on scroll (GSAP or IntersectionObserver fallback)
+            initNavCompactScroll();
+
             // Immersive hovers
             initInteractiveHover();
             initMagneticButtons();
@@ -739,6 +742,41 @@
             // CTA reveal
             gs.from('#cta .cta-wrap', {opacity: 0, y: 26, duration: 0.7, ease: 'power2.out', scrollTrigger: {trigger: '#cta', start: 'top 80%'}});
             gs.from('#cta .stat', {opacity: 0, y: 16, duration: 0.5, stagger: 0.08, ease: 'power2.out', scrollTrigger: {trigger: '#cta', start: 'top 75%'}});
+
+            // Immersive navbar compaction when demo section scrolls into view
+            window.ScrollTrigger.create({
+                trigger: '#demo',
+                start: 'top 80%',
+                end: 'bottom top',
+                toggleClass: {targets: '.nav', className: 'compact'}
+            });
+        }
+
+        // Fallback if GSAP/ScrollTrigger not available
+        function initNavCompactScroll(){
+            if (window.gsap && window.ScrollTrigger) return; // GSAP path handles this
+            const nav = document.querySelector('.nav');
+            const target = document.querySelector('#demo');
+            if (!nav || !target) return;
+            if ('IntersectionObserver' in window){
+                const obs = new IntersectionObserver((entries)=>{
+                    entries.forEach(e => {
+                        if (e.isIntersecting) nav.classList.add('compact');
+                        else nav.classList.remove('compact');
+                    });
+                }, { root: null, threshold: 0.1 });
+                obs.observe(target);
+            } else {
+                // Very simple scroll fallback
+                const onScroll = () => {
+                    const r = target.getBoundingClientRect();
+                    const vh = window.innerHeight || document.documentElement.clientHeight;
+                    const inView = r.top < vh * 0.8 && r.bottom > 0;
+                    nav.classList.toggle('compact', inView);
+                };
+                onScroll();
+                window.addEventListener('scroll', onScroll, {passive:true});
+            }
         }
 
         function initInteractiveHover(){
