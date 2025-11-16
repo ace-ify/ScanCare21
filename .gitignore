@@ -33,3 +33,7 @@ node_modules/
 
 # Public static secrets safeguard
 templates/public/*.json
+
+
+.github/instructions/kluster-code-verify.instructions.md
+.kluster
