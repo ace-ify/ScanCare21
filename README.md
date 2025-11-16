@@ -1,4 +1,165 @@
-# Guardial — LLM Prompt Shield (GenAI Hackathon)
+# ScanCare — AI-Powered Medical Report Analysis
+
+ScanCare is an intelligent web application that helps patients understand their medical reports through AI-powered analysis. Upload your lab results, radiology reports, or health documents, and get clear, easy-to-understand insights powered by advanced AI.
+
+## 🌟 Features
+
+- **Multi-Format Support**: Upload text files, PDFs, images (JPG/PNG), and DOCX documents
+- **AI-Powered Analysis**: Leverages Google Gemini AI for intelligent medical report interpretation
+- **Interactive Chat**: Ask follow-up questions and get personalized health guidance
+- **Simple Explanations**: Converts complex medical jargon into easy-to-understand language
+- **Beautiful UI**: Modern, responsive design with medical-themed colors
+- **Privacy-First**: Reports are processed temporarily and not permanently stored
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.10+
+- Google Gemini API key
+
+### Installation
+
+```powershell
+# Clone or navigate to the project directory
+cd ScanCare
+
+# Create virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file with your Gemini API key
+"GEMINI_API_KEY=YOUR_API_KEY_HERE" | Out-File -Encoding ascii .env
+
+# Run the application
+python app.py
+```
+
+The application will be available at `http://localhost:8080`
+
+## 📋 How to Use
+
+1. **Upload a Report**: Click the upload button to submit medical reports in various formats
+2. **Ask Questions**: Type health-related questions in the chat
+3. **Get Insights**: Receive AI-powered analysis and explanations
+4. **Follow Up**: Ask clarifying questions to better understand your health data
+
+## 💡 Example Use Cases
+
+- **Blood Test Analysis**: Upload CBC, lipid panel, or metabolic panel results
+- **Imaging Reports**: Get explanations of X-ray, CT, or MRI findings
+- **Lab Results**: Understand what your test values mean and if they're in normal range
+- **Health Questions**: Ask about symptoms, conditions, or medical terminology
+
+## 🏗️ Architecture
+
+- **Backend**: Flask (Python)
+- **AI Model**: Google Gemini 2.0 Flash
+- **Frontend**: Modern HTML/CSS/JS with medical-themed design
+- **File Processing**: Supports text extraction from multiple formats
+
+## 🔒 Privacy & Security
+
+- Files are processed in memory and immediately deleted after analysis
+- No permanent storage of medical reports
+- HIPAA-conscious design principles
+- Secure file upload with type validation
+
+## ⚕️ Medical Disclaimer
+
+**IMPORTANT**: ScanCare is an AI-powered tool designed to help patients understand their medical reports. It should NOT be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical decisions.
+
+## 🚀 Deployment
+
+### Deploy to Google Cloud Run
+
+```powershell
+# Create a secret for your API key
+$tmp = "$env:TEMP\gemini_key.txt"
+Set-Content -Path $tmp -Value "YOUR_GEMINI_API_KEY"
+gcloud secrets create GEMINI_API_KEY --replication-policy="automatic"
+gcloud secrets versions add GEMINI_API_KEY --data-file="$tmp"
+Remove-Item $tmp
+
+# Deploy to Cloud Run
+gcloud run deploy scancare `
+    --source . `
+    --region us-central1 `
+    --allow-unauthenticated `
+    --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest `
+    --memory 1Gi `
+    --cpu 1
+```
+
+## 📁 Project Structure
+
+```
+ScanCare/
+├── app.py              # Flask application & API endpoints
+├── config.py           # Configuration and prompt templates
+├── requirements.txt    # Python dependencies
+├── Procfile           # Gunicorn configuration for deployment
+├── uploads/           # Temporary file storage (auto-created)
+├── templates/
+│   ├── test.html      # Main application UI
+│   └── public/        # Static assets
+└── README.md
+```
+
+## 🛠️ API Endpoints
+
+### POST /analyze
+Analyze medical reports or answer health questions
+
+**Request**:
+- JSON: `{"query": "your health question"}` OR `{"report_text": "report content"}`
+- Form Data: `report_file` (file upload)
+
+**Response**:
+```json
+{
+    "status": "success",
+    "report_type": "health_query|text_report|image",
+    "analysis": "AI-generated analysis",
+    "timestamp": "2025-01-15T12:00:00Z"
+}
+```
+
+### GET /api/logs
+Retrieve application logs (for debugging)
+
+## 🎨 Customization
+
+The medical theme uses a blue/teal color palette. To customize:
+- Edit CSS variables in `templates/test.html` under `:root`
+- Main colors: `--accent` (cyan-blue), `--medical-green`, `--bg` (dark blue)
+
+## 📝 Development
+
+```powershell
+# Run in debug mode
+$env:FLASK_DEBUG="1"
+python app.py
+```
+
+## 🤝 Contributing
+
+This project was created to help patients better understand their medical reports. Contributions are welcome!
+
+## 📄 License
+
+Copyright © 2025 ScanCare. For educational and demonstration purposes.
+
+## 👥 Support
+
+For questions or support, contact: support@scancare.com
+
+---
+
+**Built with ❤️ to make healthcare more accessible and understandable for everyone.**
+
 
 Guardial is a production‑ready prompt shielding web app and API that makes LLM interactions safer. It detects and blocks prompt injection, screens for harmful content, and automatically redacts PII on both input and output—complete with live traces, structured logs, and a clean chat UI. Built for reliability and clarity so judges and users can see exactly what decisions the system made and why.
 

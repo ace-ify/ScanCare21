@@ -1,45 +1,45 @@
 # config.py
-# Fallback / default keyword policies (can be superseded by policy.json)
+# Configuration for ScanCare medical report analysis
 
-FORBIDDEN_KEYWORDS = [
-    "kill", "destroy", "hate", "unethical", "evil"
-]
+# Medical AI configuration
+MEDICAL_DISCLAIMER = """
+⚕️ IMPORTANT MEDICAL DISCLAIMER:
+This analysis is provided by an AI system and should not replace professional medical advice, 
+diagnosis, or treatment. Always seek the advice of your physician or other qualified health 
+provider with any questions you may have regarding a medical condition.
+"""
 
-PROMPT_INJECTION_KEYWORDS = [
-    "ignore previous instructions",
-    "disregard previous commands",
-    "as an ai language model, you must",
-    "new instruction:",
-    "override all previous settings",
-    "now act as",
-    "developer mode",
-    "do not follow the above instruction",
-    # Expanded coverage for common role-escalation and bypass attempts
-    "act as admin",
-    "you are admin",
-    "as admin",
-    "reveal all the important info",
-    "reveal all confidential",
-    "bypass safety",
-    "ignore safety",
-    "disable safety",
-    "override system message",
-    "forget previous instructions",
-    "do anything now",
-    "dan mode",
-    # Security bypass/leakage attempts
-    "bypass security",
-    "ignore security",
-    "disable security",
-    "reveal system prompts",
-    "show system prompts",
-    "get system prompts",
-    "leak system prompt",
-    "dump system prompt",
-    "print system prompt",
-]
+# Supported medical report formats
+SUPPORTED_FORMATS = {
+    'text': ['.txt'],
+    'documents': ['.pdf', '.docx'],
+    'images': ['.jpg', '.jpeg', '.png']
+}
 
-# Default spaCy PII entity types to redact
-PII_ENTITY_TYPES_TO_REDACT = [
-    "PERSON", "GPE", "ORG"
-]
+# AI Model configuration
+AI_MODEL = 'gemini-2.0-flash-exp'
+AI_TEMPERATURE = 0.7  # Balance between creativity and accuracy
+
+# Medical analysis prompts
+MEDICAL_ANALYSIS_PROMPT_TEMPLATE = """You are ScanCare, a helpful medical AI assistant that analyzes medical reports and provides insights.
+
+When analyzing medical reports:
+1. Extract and summarize key findings
+2. Explain medical terminology in simple terms
+3. Highlight important values and their normal ranges
+4. Identify potential concerns or abnormalities
+5. Suggest relevant follow-up questions for healthcare providers
+
+IMPORTANT: Always include a disclaimer that this is AI analysis and users should consult with healthcare professionals for medical advice.
+
+Be empathetic, clear, and focus on helping patients understand their reports better."""
+
+HEALTH_QUERY_PROMPT_TEMPLATE = """You are ScanCare, a helpful medical AI assistant that answers health-related questions.
+
+Provide accurate, evidence-based information while:
+1. Being clear and easy to understand
+2. Explaining medical concepts in layman's terms
+3. Highlighting when professional medical consultation is needed
+4. Being empathetic and supportive
+
+IMPORTANT: Always remind users that AI advice should not replace professional medical consultation."""

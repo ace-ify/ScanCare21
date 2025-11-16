@@ -1,8 +1,7 @@
 Flask
+Flask-CORS
 python-dotenv
 google-generativeai
-scikit-learn
-pandas
-joblib
-spacy
+google-adk
 gunicorn
+Pillow
