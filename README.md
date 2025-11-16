@@ -12,6 +12,12 @@
 
 ### **[https://scancare21-93219103935.asia-south1.run.app/](https://scancare21-93219103935.asia-south1.run.app/)**
 
+## 📺 Demo Video
+
+**Watch a demonstration of ScanCare in action:**
+
+### **[Google Drive Demo](https://drive.google.com/file/d/16U72A4M4rxRZm_xW60K41cMVoz4rxlFo/view?usp=sharing)**
+
 ---
 
 ## 🌟 Overview
