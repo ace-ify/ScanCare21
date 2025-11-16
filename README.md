@@ -1,416 +1,134 @@
-# ScanCare — AI-Powered Medical Report Analysis
+# ScanCare: AI-Powered Medical Report Analysis
 
-ScanCare is an intelligent web application that helps patients understand their medical reports through AI-powered analysis. Upload your lab results, radiology reports, or health documents, and get clear, easy-to-understand insights powered by advanced AI.
+**Transform your complex medical reports into simple, understandable insights.**
 
-## 🌟 Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- **Multi-Format Support**: Upload text files, PDFs, images (JPG/PNG), and DOCX documents
-- **AI-Powered Analysis**: Leverages Google Gemini AI for intelligent medical report interpretation
-- **Interactive Chat**: Ask follow-up questions and get personalized health guidance
-- **Simple Explanations**: Converts complex medical jargon into easy-to-understand language
-- **Beautiful UI**: Modern, responsive design with medical-themed colors
-- **Privacy-First**: Reports are processed temporarily and not permanently stored
+---
 
-## 🚀 Quick Start
+## 🚀 Live Application
+
+**Experience ScanCare live! Visit the deployed application:**
+
+### **[https://scancare21-93219103935.asia-south1.run.app/](https://scancare21-93219103935.asia-south1.run.app/)**
+
+---
+
+## 🌟 Overview
+
+ScanCare is an intelligent web application designed to help patients and caregivers understand complex medical reports with ease. By leveraging the power of Google's Gemini AI, ScanCare analyzes uploaded medical documents—such as lab results, radiology reports, and health summaries—and provides clear, jargon-free explanations. Users can interact with the AI through a conversational chat interface to ask follow-up questions, making healthcare more accessible and transparent for everyone.
+
+### Key Features:
+- **📄 Multi-Format Upload:** Supports various file types including `.txt`, `.pdf`, `.png`, `.jpg`, and `.docx`.
+- **🤖 AI-Powered Analysis:** Uses advanced AI to interpret medical terminology and data.
+- **💬 Interactive Chat:** Ask follow-up questions to get personalized and contextual health guidance.
+- **🔒 Privacy-First:** Your data is processed securely and is not stored permanently. Files are handled in-memory and deleted after analysis.
+- **💻 Modern & Responsive UI:** A clean, intuitive, and mobile-friendly interface designed for a seamless user experience.
+
+---
+
+## 📸 Application Screenshot
+
+*A preview of the ScanCare user interface.*
+
+![ScanCare Screenshot](https://raw.githubusercontent.com/ace-ify/ScanCare21/main/ex.webp)
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** **Flask** (Python)
+- **AI Model:** **Google Gemini 2.0 Flash**
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Deployment:** **Google Cloud Run** with Gunicorn
+
+---
+
+## ⚙️ Local Development Setup
+
+Follow these steps to run ScanCare on your local machine.
 
 ### Prerequisites
 - Python 3.10+
-- Google Gemini API key
+- A Google Gemini API Key
 
-### Installation
+### Installation & Setup
 
-```powershell
-# Clone or navigate to the project directory
-cd ScanCare
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/ace-ify/ScanCare21.git
+    cd ScanCare21
+    ```
 
-# Create virtual environment
-python -m venv .venv
-.\.venv\Scripts\activate
+2.  **Create and activate a virtual environment:**
+    ```bash
+    # For Windows
+    python -m venv .venv
+    .\.venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+    # For macOS/Linux
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
 
-# Create .env file with your Gemini API key
-"GEMINI_API_KEY=YOUR_API_KEY_HERE" | Out-File -Encoding ascii .env
+3.  **Install the required dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-# Run the application
-python app.py
-```
+4.  **Set up your environment variables:**
+    Create a file named `.env` in the root directory and add your Google Gemini API key:
+    ```
+    GEMINI_API_KEY="YOUR_API_KEY_HERE"
+    ```
 
-The application will be available at `http://localhost:8080`
+5.  **Run the application:**
+    ```bash
+    python app.py
+    ```
+    The application will be available at `http://127.0.0.1:8080`.
 
-## 📋 How to Use
+---
 
-1. **Upload a Report**: Click the upload button to submit medical reports in various formats
-2. **Ask Questions**: Type health-related questions in the chat
-3. **Get Insights**: Receive AI-powered analysis and explanations
-4. **Follow Up**: Ask clarifying questions to better understand your health data
+## 🚀 Deployment to Google Cloud Run
 
-## 💡 Example Use Cases
+This application is configured for easy deployment to Google Cloud Run using Buildpacks.
 
-- **Blood Test Analysis**: Upload CBC, lipid panel, or metabolic panel results
-- **Imaging Reports**: Get explanations of X-ray, CT, or MRI findings
-- **Lab Results**: Understand what your test values mean and if they're in normal range
-- **Health Questions**: Ask about symptoms, conditions, or medical terminology
+1.  **Authenticate with gcloud:**
+    ```bash
+    gcloud auth login
+    gcloud config set project YOUR_PROJECT_ID
+    ```
 
-## 🏗️ Architecture
+2.  **Create a secret for your API key in Secret Manager:**
+    ```bash
+    gcloud secrets create GEMINI_API_KEY --replication-policy="automatic"
+    gcloud secrets versions add GEMINI_API_KEY --data-file=".env"
+    ```
 
-- **Backend**: Flask (Python)
-- **AI Model**: Google Gemini 2.0 Flash
-- **Frontend**: Modern HTML/CSS/JS with medical-themed design
-- **File Processing**: Supports text extraction from multiple formats
+3.  **Deploy the application:**
+    ```bash
+    gcloud run deploy scancare21 \
+        --source . \
+        --region asia-south1 \
+        --allow-unauthenticated \
+        --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest \
+        --memory 1Gi \
+        --cpu 1
+    ```
 
-## 🔒 Privacy & Security
-
-- Files are processed in memory and immediately deleted after analysis
-- No permanent storage of medical reports
-- HIPAA-conscious design principles
-- Secure file upload with type validation
+---
 
 ## ⚕️ Medical Disclaimer
 
-**IMPORTANT**: ScanCare is an AI-powered tool designed to help patients understand their medical reports. It should NOT be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical decisions.
+**IMPORTANT:** ScanCare is an AI-powered tool intended for informational purposes only. It is **not** a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for any medical concerns or before making any health-related decisions.
 
-## 🚀 Deployment
-
-### Deploy to Google Cloud Run
-
-```powershell
-# Create a secret for your API key
-$tmp = "$env:TEMP\gemini_key.txt"
-Set-Content -Path $tmp -Value "YOUR_GEMINI_API_KEY"
-gcloud secrets create GEMINI_API_KEY --replication-policy="automatic"
-gcloud secrets versions add GEMINI_API_KEY --data-file="$tmp"
-Remove-Item $tmp
-
-# Deploy to Cloud Run
-gcloud run deploy scancare `
-    --source . `
-    --region us-central1 `
-    --allow-unauthenticated `
-    --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest `
-    --memory 1Gi `
-    --cpu 1
-```
-
-## 📁 Project Structure
-
-```
-ScanCare/
-├── app.py              # Flask application & API endpoints
-├── config.py           # Configuration and prompt templates
-├── requirements.txt    # Python dependencies
-├── Procfile           # Gunicorn configuration for deployment
-├── uploads/           # Temporary file storage (auto-created)
-├── templates/
-│   ├── test.html      # Main application UI
-│   └── public/        # Static assets
-└── README.md
-```
-
-## 🛠️ API Endpoints
-
-### POST /analyze
-Analyze medical reports or answer health questions
-
-**Request**:
-- JSON: `{"query": "your health question"}` OR `{"report_text": "report content"}`
-- Form Data: `report_file` (file upload)
-
-**Response**:
-```json
-{
-    "status": "success",
-    "report_type": "health_query|text_report|image",
-    "analysis": "AI-generated analysis",
-    "timestamp": "2025-01-15T12:00:00Z"
-}
-```
-
-### GET /api/logs
-Retrieve application logs (for debugging)
-
-## 🎨 Customization
-
-The medical theme uses a blue/teal color palette. To customize:
-- Edit CSS variables in `templates/test.html` under `:root`
-- Main colors: `--accent` (cyan-blue), `--medical-green`, `--bg` (dark blue)
-
-## 📝 Development
-
-```powershell
-# Run in debug mode
-$env:FLASK_DEBUG="1"
-python app.py
-```
-
-## 🤝 Contributing
-
-This project was created to help patients better understand their medical reports. Contributions are welcome!
+---
 
 ## 📄 License
 
-Copyright © 2025 ScanCare. For educational and demonstration purposes.
-
-## 👥 Support
-
-For questions or support, contact: support@scancare.com
+This project is licensed under the MIT License. See the [LICENSE](https://opensource.org/licenses/MIT) file for details.
 
 ---
 
-**Built with ❤️ to make healthcare more accessible and understandable for everyone.**
-
-
-Guardial is a production‑ready prompt shielding web app and API that makes LLM interactions safer. It detects and blocks prompt injection, screens for harmful content, and automatically redacts PII on both input and output—complete with live traces, structured logs, and a clean chat UI. Built for reliability and clarity so judges and users can see exactly what decisions the system made and why.
-
-This project is designed for fast demos and real deployments (Cloud Run). It favors simple, auditable code and policy‑driven behavior over black boxes.
-
-Highlights
-- End‑to‑end shielding pipeline with an LLM‑aware strategy system (ml | heuristic | llm | hybrid)
-- Chat UI that shows a step‑by‑step backend “Flow” trace for transparency
-- Structured event logging (EVENT_JSON) and lightweight APIs for policy and logs
-- Cloud‑native ready: Procfile + gunicorn + Buildpacks (no Dockerfile needed)
-- Sensible defaults: LLM‑only mode, model loads skipped when unnecessary, safe fallbacks when no key is present
-
----
-
-## Table of contents
-- Overview and architecture
-- Quick start (local)
-- API reference
-- Policy configuration
-- Observability and logs
-- Frontend UX tips
-- Deploy to Google Cloud Run (Buildpacks)
-- Security & privacy notes
-- Extending Guardial
-- How it meeds the criteria for an LLM Gaurd
-
----
-
-## Overview and architecture
-
-Core technologies
-- Backend: Flask (Python)
-- LLM: Google Gemini via `google-generativeai`
-- NLP: spaCy (optional NER PII redaction)
-- UI: Single‑page HTML/CSS/JS (templates/test.html)
-
-High‑level flow
-
-```
-User Prompt
-	 ↓
-Harmful content check  ──┐   (ml / heuristic / llm / hybrid)
-	 ↓ allow/block           ├─> Structured event logs (EVENT_JSON)
-Prompt injection check  ──┘
-	 ↓ allow/block
-PII redaction (input)
-	 ↓
-LLM generation (Gemini)
-	 ↓
-Optional response screening (harmful + PII)
-	 ↓
-Response + trace to UI
-```
-
-Key files
-- `app.py` — Flask app, `/shield_prompt`, `/api/policy`, `/api/logs`, UI route
-- `detectors.py` — Orchestrates detection/redaction with configurable strategies
-- `llm_detectors.py` — Gemini‑backed helpers (soft dependency, safe no‑op if no key)
-- `policy.json` — Toggle modules, pick strategies, thresholds, LLM model
-- `templates/test.html` — Chat UI + Live “Flow” panel, responsive and animated
-- `smoke_test.py` — Minimal safety checks to validate behavior
-
----
-
-## Quick start (local)
-
-Prerequisites
-- Python 3.10+
-- A Gemini API key (create a `.env` with `GEMINI_API_KEY=...`)
-
-Setup
-
-```powershell
-# From the project root
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-
-# Optional but recommended if you want spaCy NER redaction locally
-python -m spacy download en_core_web_sm
-
-# Create .env with your key
-"GEMINI_API_KEY=YOUR_KEY_HERE" | Out-File -Encoding ascii -NoNewline .env
-
-# Run (dev server)
-python app.py
-# Opens on http://127.0.0.1:8080 (binds to 0.0.0.0 and respects PORT)
-```
-
-Sanity test
-
-```powershell
-python smoke_test.py
-```
-
----
-
-## API reference
-
-1) POST `/shield_prompt`
-- Request: `{"prompt": "<user text>"}`
-- Responses:
-	- 200 success
-		- `{"status": "success", "original_prompt": "...", "processed_prompt": "...", "llm_response": "...", "trace": [...]}`
-	- 403 blocked (input)
-		- `{"status": "blocked", "reason": "...", "trace": [...]}`
-	- 403 blocked (response screen)
-		- `{"status": "blocked_response", "reason": "...", "llm_output_blocked": "...", "trace": [...]}`
-
-Trace entries
-- Each step adds `{ step, strategy, decision, reason? }` so decisions are explainable.
-
-2) GET `/api/policy`
-- Returns the loaded `policy.json` (what strategies are active, thresholds, etc.).
-
-3) GET `/api/logs?limit=200`
-- Returns `{ events: [ ... ] }` parsed from `prompt_shield.log` where every event is a compact JSON record tagged with `EVENT_JSON`.
-
----
-
-## Policy configuration
-
-`policy.json` lets you enable/disable detectors and choose a strategy per module:
-- `ml` — use trained model or library (e.g., spaCy)
-- `heuristic` — keywords / rules
-- `llm` — use the LLM helper functions exclusively when available
-- `hybrid` — combine traditional and LLM; if any flags, we act (block/redact)
-
-Example knobs
-- `enabled_detectors.harmful_content.strategy` = `llm`
-- `enabled_detectors.harmful_content.threshold` = `0.5`
-- `enabled_detectors.pii_redaction.entity_types` = `["PERSON","ORG","GPE"]`
-- `response_screening.enabled` = `true|false`
-- `llm.model` = `gemini-2.5-flash` (default used in code if unspecified)
-
-Behavioral optimizations
-- When harmful content strategy is `llm`, the app skips loading the local model for faster cold starts.
-- Redaction always includes a light regex pass for emails/phones even if spaCy isn’t installed.
-
----
-
-## Observability and logs
-
-Where
-- File: `prompt_shield.log`
-- API: `GET /api/logs?limit=...`
-
-Event shape (examples)
-- `BLOCK` (harmful or injection)
-- `REDACT` (PII on input or output)
-- `SUCCESS` (allowed flow)
-
-Every event includes a UTC timestamp, a preview of the LLM response (safe truncated), and metadata for quick debugging.
-
----
-
-## Frontend UX tips
-
-- The landing page is a single responsive HTML template with:
-	- Chat pane (left) and a Flow/Raw JSON pane (right) with a draggable splitter
-	- Scroll‑aware navbar that subtly shrinks and returns to base at top
-	- Optional custom cursor (white dot) for a premium feel
-	- Smooth GSAP reveals where appropriate, respecting reduced‑motion settings
-
-Keyboard shortcuts
-- Ctrl/Cmd + Enter to send
-
----
-
-## Deploy to Google Cloud Run (Buildpacks)
-
-This repo is deployment‑ready without a Dockerfile.
-
-What’s included
-- `Procfile` — `web: gunicorn -k gthread -w 2 -b :$PORT app:app`
-- `requirements.txt` — includes `gunicorn`
-- `app.py` — binds to `0.0.0.0:$PORT`
-
-UI (Deploy from source)
-1. Select repo and set Branch to `^main$`
-2. Build Type: Google Cloud’s buildpacks
-3. Build context: `/`
-4. Entrypoint: leave blank (Buildpacks reads `Procfile`)
-5. Service: allow unauthenticated, min=0, max=3–10, timeout=300s
-6. Variables & Secrets: add `GEMINI_API_KEY` from Secret Manager (latest)
-7. Deploy
-
-CLI (PowerShell)
-
-```powershell
-# One-time secret
-$tmp = "$env:TEMP\gemini_key.txt"; Set-Content -Path $tmp -Value "YOUR_KEY"
-gcloud secrets create GEMINI_API_KEY --replication-policy="automatic"
-gcloud secrets versions add GEMINI_API_KEY --data-file="$tmp"
-
-# Deploy from source with Buildpacks
-gcloud run deploy prompt-shield `
-	--source . `
-	--region us-central1 `
-	--allow-unauthenticated `
-	--set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest
-```
-
-Continuous deployment
-- Create a Cloud Build trigger on `main` so every push rebuilds a new revision.
-
----
-
-## Security & privacy notes
-
-- Never commit `.env`; use Secret Manager in production.
-- LLM responses and prompts are logged only with small, truncated previews (not full payloads by default).
-- PII redaction is conservative and layered: regex + spaCy (if installed) + optional LLM pass in `llm`/`hybrid`.
-- Public assets never contain secrets. A placeholder file documents the risk.
-
----
-
-## Extending Guardial
-
-Add a new detector
-1. Implement a helper in `llm_detectors.py` (or a traditional function/library)
-2. Wire it through `detectors.py` with a strategy gate
-3. Add config knobs to `policy.json`
-4. Update the UI flow renderer if you want the step visualized
-
-Swap LLMs
-- `llm_detectors.py` centralizes prompt templates; add a model switch here and surface it in `policy.json`.
-
----
-
-## How this meets the needs of a model armor
-
-- Impact
-	- Tackles core safety issues (injection, toxicity, PII) with an explainable pipeline suitable for real apps.
-- Technical quality
-	- Policy‑driven architecture; LLM‑aware strategies with short‑circuiting; production‑grade serving via gunicorn.
-- UX & transparency
-	- Clear chat demo, live flow traces, JSON panel, copy‑to‑clipboard, subtle motion.
-- Reliability
-	- Smoke tests; safe fallbacks if spaCy or keys are missing; model loads skipped in LLM‑only mode to speed startup.
-- Deployability
-	- Cloud Run ready with Buildpacks + Procfile; secrets via Secret Manager; CI trigger recommended.
-
----
-
-## License
-
-Copyright © Contributors. For hackathon evaluation and demo use. Add a LICENSE file if you plan to open‑source.
-
----
-
-## Maintainers
-
-Team Guardial — built for the GenAI Hackathon.
+**Built with ❤️ for the Hackathon Community**
