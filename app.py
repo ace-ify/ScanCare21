@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory, session
+from flask_cors import CORS
 import os
 import json
 import logging
@@ -10,14 +11,6 @@ from agents import ScanCareWorkflow
 from PIL import Image
 import base64
 
-# Try to import CORS, but don't fail if it's not available
-try:
-    from flask_cors import CORS
-    CORS_AVAILABLE = True
-except ImportError:
-    CORS_AVAILABLE = False
-    logging.warning("Flask-CORS not available. Install with: pip install Flask-CORS")
-
 # Load environment variables from .env file
 load_dotenv()
 
@@ -28,18 +21,7 @@ app = Flask(
     static_url_path='/public'
 )
 
-# Enable CORS if available
-if CORS_AVAILABLE:
-    CORS(app)  # Enable CORS for all routes
-else:
-    # Manual CORS headers for all responses
-    @app.after_request
-    def add_cors_headers(response):
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-
+CORS(app)  # Enable CORS for all routes
 app.secret_key = secrets.token_hex(32)  # For session management
 
 # Configure logging
@@ -93,13 +75,11 @@ def get_user_workflow():
     if scancare_workflow is None:
         return None
     
-    # Get or create session ID
     if 'session_id' not in session:
         session['session_id'] = secrets.token_hex(16)
     
     session_id = session['session_id']
     
-    # Create workflow for this user if it doesn't exist
     if session_id not in user_workflows:
         user_workflows[session_id] = ScanCareWorkflow(api_key)
         logger.info(f"Created new workflow for session: {session_id[:8]}...")
@@ -127,6 +107,38 @@ def log_event(event_type: str,
         logger.error(f"Failed to log structured event: {e}")
 
 
+@app.route('/image-review', methods=['POST'])
+def image_review():
+    """
+    Minimal endpoint: upload image, extract text using Gemini, return result.
+    """
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY not configured"}), 500
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file uploaded. Use 'image' field."}), 400
+    file = request.files['image']
+    if not file or not file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        return jsonify({"error": "Invalid file type. Only PNG, JPG, JPEG allowed."}), 400
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        image_data = file.read()
+        mime_type = 'image/jpeg' if file.filename.lower().endswith('.jpg') else f"image/{file.filename.split('.')[-1].lower()}"
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        prompt = "Extract all text from this medical report image. Output only the extracted text." 
+        response = model.generate_content([
+            prompt,
+            {"mime_type": mime_type, "data": image_data}
+        ])
+        if response and response.text:
+            return jsonify({"status": "success", "extracted_text": response.text})
+        else:
+            return jsonify({"error": "No text extracted from image."}), 500
+    except Exception as e:
+        return jsonify({"error": f"Image processing error: {str(e)}"}), 500
+
+
 @app.route('/')
 def home():
     """Render the ScanCare main page."""
@@ -144,19 +156,7 @@ def public_assets(filename):
 def analyze_report():
     """
     Multi-agent analysis endpoint for medical reports.
-    
-    Supports:
-    - Text input (JSON with 'report_text')
-    - File uploads (txt, pdf, docx, images)
-    - Conversational queries (JSON with 'query')
-    
-    Workflow:
-    1. Extract structured data from report
-    2. Analyze values and check ranges
-    3. Generate comprehensive insights
-    4. Maintain context for follow-ups
     """
-    
     if scancare_workflow is None:
         return jsonify({
             "error": "ScanCare system not initialized. Please check API key configuration."
@@ -171,7 +171,6 @@ def analyze_report():
         is_report = False
         analysis_metadata = {}
         
-        # Check if this is a file upload
         if 'report_file' in request.files:
             file = request.files['report_file']
             if file and file.filename and allowed_file(file.filename):
@@ -182,42 +181,31 @@ def analyze_report():
                 analysis_metadata['filename'] = filename
                 analysis_metadata['file_type'] = filename.split('.')[-1].lower()
                 
-                # Extract text based on file type
                 if filename.lower().endswith('.txt'):
                     with open(filepath, 'r', encoding='utf-8') as f:
                         report_text = f.read()
                     is_report = True
                 
                 elif filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    # For images, use basic Gemini vision first to extract text
-                    # Then pass to multi-agent workflow
                     try:
                         import google.generativeai as genai
                         genai.configure(api_key=api_key)
                         
-                        # Read image file
                         with open(filepath, 'rb') as img_file:
                             image_data = img_file.read()
                         
-                        # Determine correct mime type
                         file_ext = analysis_metadata['file_type'].lower()
-                        if file_ext == 'jpg':
-                            mime_type = 'image/jpeg'
-                        else:
-                            mime_type = f'image/{file_ext}'
+                        mime_type = 'image/jpeg' if file_ext == 'jpg' else f'image/{file_ext}'
                         
-                        # Create vision model - try experimental first, fallback to stable
                         try:
                             vision_model = genai.GenerativeModel('gemini-2.0-flash-exp')
                         except Exception as model_err:
                             logger.warning(f"Experimental model not available, using stable: {model_err}")
                             vision_model = genai.GenerativeModel('gemini-1.5-flash')
                         
-                        # Extract text from image
                         extract_prompt = """Extract all text from this medical report image. 
                         Preserve the exact values, units, and structure. Output only the extracted text."""
                         
-                        # Upload the image data properly
                         response = vision_model.generate_content([
                             extract_prompt,
                             {"mime_type": mime_type, "data": image_data}
@@ -240,7 +228,6 @@ def analyze_report():
                         }), 500
                 
                 elif filename.lower().endswith(('.pdf', '.docx')):
-                    # Note about format support
                     report_text = f"""[{filename}]
                     
 PDF and DOCX parsing requires additional libraries (PyPDF2, python-docx).
@@ -249,7 +236,6 @@ Please paste the text content or convert to .txt format for full analysis.
 However, you can still ask me questions about your report!"""
                     is_report = False
                 
-                # Clean up uploaded file
                 try:
                     os.remove(filepath)
                 except Exception as e:
@@ -257,7 +243,6 @@ However, you can still ask me questions about your report!"""
             else:
                 return jsonify({"error": "Invalid file type. Allowed: txt, pdf, docx, png, jpg, jpeg"}), 400
         
-        # Check if this is JSON input
         elif request.json:
             data = request.json
             if 'report_text' in data:
@@ -268,7 +253,7 @@ However, you can still ask me questions about your report!"""
                 report_text = data['query']
                 is_report = False
                 analysis_metadata['input_type'] = 'conversational_query'
-        # Also check form data
+
         elif request.form:
             if 'report_text' in request.form:
                 report_text = request.form['report_text']
@@ -284,10 +269,8 @@ However, you can still ask me questions about your report!"""
         
         logger.info(f"🚀 Processing {'REPORT' if is_report else 'QUERY'} via multi-agent workflow")
         
-        # Route through multi-agent workflow
         result = workflow.handle_conversation(report_text, is_report=is_report)
         
-        # Structure response based on result type
         if result['type'] == 'report_analysis':
             response_data = {
                 "status": "success",
@@ -312,7 +295,7 @@ However, you can still ask me questions about your report!"""
                 }
             )
         
-        else:  # conversation type
+        else:
             response_data = {
                 "status": "success",
                 "analysis_type": "conversational",
@@ -335,7 +318,6 @@ However, you can still ask me questions about your report!"""
     except Exception as e:
         logger.exception(f"❌ Error in multi-agent workflow: {e}")
         
-        # Get more detailed error info
         error_details = {
             "error_type": type(e).__name__,
             "error": str(e),
@@ -349,7 +331,6 @@ However, you can still ask me questions about your report!"""
             metadata=error_details
         )
         
-        # Provide helpful error message
         error_message = str(e)
         if "API" in error_message or "key" in error_message.lower():
             error_message = "API configuration error. Please check your GEMINI_API_KEY."
@@ -368,9 +349,7 @@ However, you can still ask me questions about your report!"""
 def chat():
     """
     Conversational endpoint for follow-up questions.
-    Uses context from previous analysis to provide contextual answers.
     """
-    
     if scancare_workflow is None:
         return jsonify({"error": "ScanCare system not initialized"}), 500
     
@@ -386,7 +365,6 @@ def chat():
         message = data['message']
         logger.info(f"💬 Chat message: {message[:100]}...")
         
-        # Use the conversational agent with context
         response = workflow.ask_followup(message)
         
         log_event(
@@ -475,7 +453,6 @@ def health_check():
 
 
 if __name__ == '__main__':
-    # Bind to the PORT environment variable (defaults to 8080)
     port = int(os.environ.get("PORT", 8080))
     
     logger.info("=" * 60)
@@ -487,5 +464,4 @@ if __name__ == '__main__':
     logger.info(f"🔑 API Key: {'✅ Configured' if api_key else '❌ Missing'}")
     logger.info("=" * 60)
     
-    # Listen on all interfaces for container platforms
     app.run(host="0.0.0.0", port=port, debug=True)

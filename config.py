@@ -14,6 +14,11 @@ SUPPORTED_FORMATS = {
     'text': ['.txt'],
     'documents': ['.pdf', '.docx'],
     'images': ['.jpg', '.jpeg', '.png']
+# Load Gemini API key from .env
+import os
+from dotenv import load_dotenv
+load_dotenv()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 }
 
 # AI Model configuration
