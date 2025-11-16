@@ -31,7 +31,7 @@ ScanCare is an intelligent web application designed to help patients and caregiv
 
 *A preview of the ScanCare user interface.*
 
-![ScanCare Screenshot](https://raw.githubusercontent.com/ace-ify/ScanCare21/main/ex.webp)
+![ScanCare Screenshot](https://raw.githubusercontent.com/ace-ify/ScanCare21/main/public/src/mock.png)
 
 ---
 
